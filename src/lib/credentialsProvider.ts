@@ -1,10 +1,25 @@
-import type { EndpointOutput } from "@sveltejs/kit";
+import type {EndpointOutput, RequestEvent} from "@sveltejs/kit";
 import type {Auth} from "sk-auth/dist/auth";
 import { CallbackResult, Providers, SvelteKitAuth,} from "sk-auth"
+import type {ProviderConfig} from "sk-auth/dist/providers/base"
 
-export class CredentialsProvider extends Providers.Provider {
+export interface CredentialsProfile {
+    sub: string;
+    name: string;
+    email: string;
+    admin: boolean;
+}
 
-    constructor() {
+interface CredentialsProviderConfig<ProfileType = CredentialsProfile>
+    extends ProviderConfig {
+    userProfileFields?: string | (keyof ProfileType)[] | (string | number | symbol)[];
+}
+
+export class CredentialsProvider<ProfileType = CredentialsProfile> extends Providers.Provider<
+    CredentialsProviderConfig
+    > {
+
+    constructor(protected readonly config: CredentialsProviderConfig) {
         super({
             id: 'credentials',
             profile(profile) {
@@ -15,16 +30,23 @@ export class CredentialsProvider extends Providers.Provider {
 
     }
 
-
-    callback<Locals extends Record<string, any> = Record<string, any>>(request: any, svelteKitAuth: SvelteKitAuth): CallbackResult | Promise<CallbackResult> {
-        const param = request;
-        return [ param, param ? param : '/' ];
+    callback<Locals, Body>(event: RequestEvent, svelteKitAuth: Auth): CallbackResult | Promise<CallbackResult> {
+        const profile = {
+            sub: "a",
+            name: "pepa",
+            email: "a@p.cz",
+            admin: false,
+        }
+        console.log(event)
+        return [profile, null, null]
     }
 
-    signin<Locals>(request: Locals, svelteKitAuth: Auth): EndpointOutput | Promise<EndpointOutput> {
-        return undefined;
+    signin<Locals, Body>(event: RequestEvent, svelteKitAuth: Auth): EndpointOutput | Promise<EndpointOutput> {
+        console.log(event)
+        return {
+            body: {
+                message: "it works"
+            }
+        };
     }
-
-
-
 }

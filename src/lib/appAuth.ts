@@ -2,11 +2,24 @@ import { SvelteKitAuth } from 'sk-auth';
 import { CredentialsProvider } from "$lib/credentialsProvider"
 
 import dotenv from 'dotenv';
+import {GoogleOAuth2Provider} from "sk-auth/providers"
 dotenv.config();
 
 export const appAuth = new SvelteKitAuth({
     providers: [
-        new CredentialsProvider(),
+        new CredentialsProvider({
+            id: "credentials",
+            profile(profile) {
+                return { ...profile, provider: "credentials" };
+            }
+        }),
+        new GoogleOAuth2Provider({
+            // clientId: import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID,
+            // clientSecret: import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_SECRET,
+            profile(profile) {
+                return { ...profile, provider: "google" };
+            },
+        }),
 
 
     ],
